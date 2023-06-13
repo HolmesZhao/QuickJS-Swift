@@ -27,7 +27,7 @@ public typealias JSCValue = QuickJSC.JSValue
 public typealias JSCValuePointer = UnsafeMutablePointer<JSCValue>
 
 // MARK: - JSValue
-
+public
 extension JSCValue {
     static var null: JSCValue {
         return JSCValue(u: JSValueUnion(int32: 0), tag: Int64(JS_TAG_NULL))
@@ -71,6 +71,7 @@ public class JSValue {
     }
 }
 
+public
 extension JSValue {
     static var undefined: JSValue {
         return JSValue(nil, value: .undefined)
@@ -80,6 +81,7 @@ extension JSValue {
     }
 }
 
+public
 extension JSValue {
     var isFunction: Bool {
         guard let context = context?.context else { return false }
