@@ -28,13 +28,12 @@ public var QuickJSPath: String?
 func js_module_loader_swift(_ ctx: OpaquePointer!, _ module_name: UnsafePointer<CChar>!, _ opaque: UnsafeMutableRawPointer!) -> OpaquePointer! {
     if let module_name,
        let name = String(cString: module_name, encoding: .utf8),
-       let QuickJSPath {
-        let moduleName = (QuickJSPath + name).withCString { $0 }
+       let QuickJSPath,
+       let moduleName = (QuickJSPath + name).utf8CString.withUnsafeBufferPointer({ $0 }).baseAddress {
         return js_module_loader(ctx, moduleName, opaque)
     }
     return js_module_loader(ctx, module_name, opaque)
 }
-
 public class JSRuntime {
     public var jsInstance: OpaquePointer
     
