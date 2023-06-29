@@ -24,6 +24,7 @@ import Foundation
 import QuickJSC
 
 public class JSRuntime {
+    public var jsPath: String?
     public var jsInstance: OpaquePointer
     
     static let contextBuilder: @convention(c) (OpaquePointer?) -> OpaquePointer? = { rt in
@@ -38,14 +39,15 @@ public class JSRuntime {
         return ctx
     }
     
-    public init?() {
+    public init?(with path: String?) {
         guard let runtime = JS_NewRuntime() else {
             return nil
         }
+        self.jsPath = path
         self.jsInstance = runtime
         js_std_set_worker_new_context_func(JSRuntime.contextBuilder);
         js_std_init_handlers(runtime);
-        JS_SetModuleLoaderFunc(runtime, nil, js_module_loader, nil);
+        JS_SetModuleLoaderFunc(runtime, nil, js_module_loader_swift, nil);
     }
     
     deinit {
@@ -57,5 +59,15 @@ public class JSRuntime {
             return JSContext(self, context: context)
         }
         return nil
+    }
+    
+    func js_module_loader_swift(_ ctx: OpaquePointer!, _ module_name: UnsafePointer<CChar>!, _ opaque: UnsafeMutableRawPointer!) -> OpaquePointer! {
+        if let module_name,
+           let name = String(cString: module_name, encoding: .utf8),
+           let jsPath {
+            let moduleName = (jsPath + name).withCString { $0 }
+            return js_module_loader(ctx, moduleName, opaque)
+        }
+        return js_module_loader(ctx, module_name, opaque)
     }
 }
